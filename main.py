@@ -57,9 +57,17 @@ def data(array):
   display.append(classInterval)
   display.append(classFrequency)
   display.append(relativeFrequency)
-  
-wb = openpyxl.Workbook()
 
+  print(display[2])
+  wb = openpyxl.Workbook()
+  hoja = wb.active
+
+  for x in display[0]:
+      # producto es una tupla con los valores de un producto 
+      hoja.append(x)
+  
+  wb.save('productos.xlsx')
+  
 
 
 if __name__ == "__main__":
