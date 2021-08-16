@@ -10,8 +10,8 @@ def data(array):
   interval = array[0] - array[total-1]
   #print(array)
 
-  #print("total:"+str(total))
-  #print("interval:" +str(abs(interval)))
+  print("total:"+str(total))
+  print("interval:" +str(abs(interval)))
 
   classNumber = 6
   ValueNumber = 4
@@ -54,21 +54,21 @@ def data(array):
   #print(classFrequency)
   #print(relativeFrequency)
 
-  display.append(classInterval)
-  display.append(classFrequency)
-  display.append(relativeFrequency)
 
-  print(display[2])
+
+  for i in range(classNumber):
+    tuple = (str(classInterval[i]),classFrequency[i],relativeFrequency[i])
+    display.append(tuple)
+
   wb = openpyxl.Workbook()
   hoja = wb.active
 
-  for x in display[0]:
+  for x in display:
       # producto es una tupla con los valores de un producto 
       hoja.append(x)
   
   wb.save('productos.xlsx')
-  
 
 
 if __name__ == "__main__":
-  data(example)
+  data(example_2)
