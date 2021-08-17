@@ -2,7 +2,7 @@ import os
 import openpyxl
 import math
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.chart import BarChart, Series, Reference
+from openpyxl.chart import BarChart,ScatterChart, Series, Reference
 
 
 os.system("cls")
@@ -24,12 +24,15 @@ def data(array):
   off = 0
   initial = 0
   y = 0
+  actual = 0
+  same = 0
 
   classInterval = []
   middlePoint = []
   classFrequency = []
   relativeFrequency = []
   display = []
+  infoGeogebra = []
 
   for i in range(classNumber):
     if off>0:
@@ -43,22 +46,23 @@ def data(array):
     middlePoint.append((i[0]+i[1])/2)
     count = 0
     for j in array:
-      #print("j:"+str(j))
-      #print("("+str(i[0])+","+str(i[1])+")")
       if( j >= i[0] and j<=i[1]):
-        #print(str(j)+","+str(y))
-        #print(str("(")+str(j)+str(")")+"*")
+        if(actual == j ):
+          y = y + 0.4
+          same = same + 0.4
+        if(actual != j):
+          y = y - same
+          same = 0
+        
+        tupleGeo = (j,y)
+        infoGeogebra.append(tupleGeo)
         count = count + 1
-    #print(count)
+        actual = j
     y = y + 1
     classFrequency.append(count)
   
   for i in classFrequency:
     relativeFrequency.append(i/total)
-
-  #print(classInterval)
-  #print(classFrequency)
-  #print(relativeFrequency)
 
   for i in range(classNumber):
     tuple = (str(classInterval[i]),relativeFrequency[i],classFrequency[i],middlePoint[i])
@@ -68,14 +72,28 @@ def data(array):
   hoja = wb.active
   hoja.append(["Class Interval","Relative Frequencys","Class Frequency","Middle Point"])
   for x in display:
-      hoja.append(x)
+    hoja.append(x)
+
+  hoja.cell(column = 10 , row = 1 ,value= "x")
+  hoja.cell(column = 11 , row = 1 ,value= "y")
+  for row,value in enumerate(infoGeogebra,start = 2):
+    hoja.cell(column = 10 , row = row ,value= value[0])
+    hoja.cell(column = 11 , row = row ,value= value[1])
+
   
   ref = "A1:" + "D" + str(classNumber + 1) 
+  ref_2 = "J1:" + "K" + str(hoja.max_row)
+
   tab = Table(displayName="Table1", ref=ref)
+  tab_2 = Table(displayName="Table2", ref=ref_2)
   style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
                        showLastColumn=False, showRowStripes=True, showColumnStripes=True)
   tab.tableStyleInfo = style
+  tab_2.tableStyleInfo = style
+
+ 
   hoja.add_table(tab)
+  hoja.add_table(tab_2)
 
   chart1 = BarChart()
   chart1.type = "col"
@@ -83,12 +101,33 @@ def data(array):
   chart1.title = "Histogram"
   chart1.y_axis.title = 'Relative Frequency'
   chart1.x_axis.title = 'Class Interval'
-  data = Reference(hoja, min_col=2, min_row=1, max_row=hoja.max_row, max_col=2)
-  cats = Reference(hoja, min_col=1, min_row=2, max_row=hoja.max_row)
+  data = Reference(hoja, min_col=2, min_row=1, max_row=classNumber+1, max_col=2)
+  cats = Reference(hoja, min_col=1, min_row=2, max_row=classNumber+1)
   chart1.add_data(data, titles_from_data=True)
   chart1.set_categories(cats)
   chart1.shape = 4
   hoja.add_chart(chart1, "A10")
+
+
+  chart = ScatterChart()
+  chart.title = "Dot Plot"
+  chart.style = 12
+  chart.x_axis.title = ''
+  chart.y_axis.title = ''
+  chart.x_axis.scaling.min = array[0]
+  chart.x_axis.scaling.max = array[total - 1 ]
+  chart.legend = None
+
+  xvalues = Reference(hoja, min_col = 10, min_row = 2, max_row = hoja.max_row)
+  values = Reference(hoja, min_col = 11, min_row = 1, max_row = hoja.max_row)
+  series = Series(values, xvalues, title_from_data = True)
+  series.marker.symbol = "circle"
+  series.graphicalProperties.line.noFill = True
+  chart.y_axis.title = ""
+  chart.series.append(series)
+  hoja.add_chart(chart, "M10")
+
+
   wb.save('pyhton.xlsx')
 
   
